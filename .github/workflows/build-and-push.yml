@@ -1,0 +1,85 @@
+
+name: Build and Publish Hello World
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/build-and-push.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+concurrency:
+  group: hello-world-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::788353521849:role/GitHubActionsECRRole
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="$REGISTRY/eks-hello-world:$IMAGE_TAG"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Update GitOps image tag
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("kubernetes/deployment.yaml")
+          content = path.read_text()
+          image = (
+              f"{os.environ['REGISTRY']}/"
+              f"eks-hello-world:{os.environ['IMAGE_TAG']}"
+          )
+
+          lines = content.splitlines()
+          lines = [
+              f"          image: {image}"
+              if line.startswith("          image: ")
+              else line
+              for line in lines
+          ]
+          path.write_text("\n".join(lines) + "\n")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add kubernetes/deployment.yaml
+          git diff --cached --quiet || \
+            git commit -m "chore: deploy image $IMAGE_TAG [skip ci]"
+
+          git push
