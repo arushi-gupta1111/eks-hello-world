@@ -1,5 +1,5 @@
 
-apiVersion: apps/v1   #check
+apiVersion: apps/v1   #1check
 kind: Deployment
 metadata:
   name: hello-world
