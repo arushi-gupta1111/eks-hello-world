@@ -1,14 +1,11 @@
 FROM python:3.12-alpine
 
 WORKDIR /app
-
 COPY app/main.py /app/main.py
 
-RUN addgroup -S appgroup \
-    && adduser -S appuser -G appgroup
-
+RUN adduser -D -u 10001 appuser
 USER appuser
 
 EXPOSE 8080
+CMD ["python", "-u", "/app/main.py"]
 
-CMD ["python", "main.py"]
