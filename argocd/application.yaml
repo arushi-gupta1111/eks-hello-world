@@ -7,11 +7,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/arushi-gupta1111/eks-hello-world.git
-    targetRevision: main
+    targetRevision: main                                                               #'tracks the main branch
     path: kubernetes
   destination:
-    server: https://kubernetes.default.svc
-    namespace: hello-world
+    server: https://kubernetes.default.svc                       #	Targets the Kubernetes cluster where Argo CD runs.
+    namespace: hello-world1
   syncPolicy:
     automated:
       prune: true
