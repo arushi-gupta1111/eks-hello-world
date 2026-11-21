@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hello-world
-          image: 788353521849.dkr.ecr.eu-north-1.amazonaws.com/eks-hello-world:bootstrap
+          image: 788353521849.dkr.ecr.eu-north-1.amazonaws.com/eks-hello-world:732ec9aa7f9e6306423166c5d994b6b91104a963
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
