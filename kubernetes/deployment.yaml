@@ -3,7 +3,7 @@ apiVersion: apps/v1   #1check
 kind: Deployment
 metadata:
   name: hello-world
-  namespace: hello-world
+  #namespace: hello-world
 spec:
   replicas: 1
   selector:
