@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: mypod
+  name: newpod
+spec:
+  #nodeName: ip-172-31-35-87.eu-north-1.compute.internal
+  nodeName: ip-172-31-42-163.eu-north-1.compute.internal
+  containers:
+  - image: nginx
+    name: container1
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
